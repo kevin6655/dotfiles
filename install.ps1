@@ -3,10 +3,37 @@ $ErrorActionPreference = "Stop"
 $RepoRoot = $PSScriptRoot
 $SourceVimrc = Join-Path $RepoRoot "vim\vimrc"
 $TargetVimrc = Join-Path $HOME "_vimrc"
+$VimAutoloadDir = Join-Path $HOME "vimfiles\autoload"
+$PlugVim = Join-Path $VimAutoloadDir "plug.vim"
+$PlugUrl = "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
 
 if (-not (Test-Path $SourceVimrc)) {
     throw "Vim config not found: $SourceVimrc"
 }
+
+$vimCommand = Get-Command vim -ErrorAction SilentlyContinue
+if (-not $vimCommand) {
+    throw "vim.exe was not found in PATH. Add the Vim installation directory to PATH first."
+}
+
+$versionOutput = & vim --version
+if ($LASTEXITCODE -ne 0) {
+    throw "Unable to execute 'vim --version'."
+}
+
+$versionLine = $versionOutput | Select-Object -First 1
+if ($versionLine -notmatch "Vi IMproved (\d+)\.(\d+)") {
+    throw "Unable to determine Vim version from: $versionLine"
+}
+
+$vimMajor = [int]$Matches[1]
+if ($vimMajor -lt 9) {
+    throw "yegappan/lsp requires Vim 9.0 or newer. Detected: $versionLine"
+}
+
+# Install/update vim-plug in the standard Windows Vim runtime directory.
+New-Item -ItemType Directory -Force -Path $VimAutoloadDir | Out-Null
+Invoke-WebRequest -Uri $PlugUrl -OutFile $PlugVim
 
 # Back up an existing _vimrc unless it was created by this installer.
 if (Test-Path $TargetVimrc) {
@@ -35,9 +62,18 @@ execute 'source ' . fnameescape('$escapedSource')
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText($TargetVimrc, $loader, $utf8NoBom)
 
+Write-Host "Installing/updating Vim plugins..."
+& vim -Nu $TargetVimrc -n -es -c "PlugInstall --sync" -c "qa"
+
+if ($LASTEXITCODE -ne 0) {
+    throw "Vim plugin installation failed."
+}
+
 Write-Host ""
 Write-Host "Vim dotfiles installed."
-Write-Host "Loader : $TargetVimrc"
-Write-Host "Config : $SourceVimrc"
+Write-Host "Loader   : $TargetVimrc"
+Write-Host "Config   : $SourceVimrc"
+Write-Host "vim-plug : $PlugVim"
 Write-Host ""
-Write-Host "Open Vim and run ':scriptnames' to confirm that vim\vimrc is loaded."
+Write-Host "First-stage plugins are installed."
+Write-Host "Language servers are intentionally not configured yet; that is stage 2."
