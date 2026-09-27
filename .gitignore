@@ -1,0 +1,13 @@
+# Vim runtime state
+*.swp
+*.swo
+*.swn
+*~
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Editor/IDE metadata
+.vscode/
+.idea/
