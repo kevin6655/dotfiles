@@ -8,14 +8,49 @@
 
 set nocompatible
 
+" Use UTF-8 internally.
+set encoding=utf-8
+
+
+" ------------------------------------------------------------
+" Plugin management (vim-plug)
+" ------------------------------------------------------------
+
+" Keep the vimrc usable even before vim-plug is installed.
+if exists('*plug#begin')
+    if has('win32') || has('win64')
+        call plug#begin(expand('~/vimfiles/plugged'))
+    else
+        call plug#begin(expand('~/.vim/plugged'))
+    endif
+
+    " LSP client for Vim 9. Language servers are configured separately.
+    Plug 'yegappan/lsp'
+
+    " Fuzzy file/buffer finder.
+    Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+    Plug 'junegunn/fzf.vim'
+
+    " Git integration.
+    Plug 'tpope/vim-fugitive'
+    Plug 'airblade/vim-gitgutter'
+
+    " Editing helpers that follow Vim's operator/motion model.
+    Plug 'tpope/vim-surround'
+    Plug 'tpope/vim-commentary'
+
+    call plug#end()
+else
+    echohl WarningMsg
+    echom 'vim-plug is not installed. Run install.ps1 from the dotfiles repository.'
+    echohl None
+endif
+
 " Enable filetype plugins and filetype-specific indentation.
 filetype plugin indent on
 
 " Syntax highlighting.
 syntax enable
-
-" Use UTF-8 internally.
-set encoding=utf-8
 
 
 " ------------------------------------------------------------
@@ -37,6 +72,9 @@ set showcmd
 set showmode
 set laststatus=2
 set showmatch
+
+" Keep the sign column visible so Git/LSP signs do not shift the text.
+set signcolumn=yes
 
 " Keep context around the cursor while scrolling.
 set scrolloff=5
@@ -181,6 +219,32 @@ nnoremap <silent> <leader>p :bprevious<CR>
 
 " Open netrw.
 nnoremap <silent> <leader>e :Ex<CR>
+
+
+" ------------------------------------------------------------
+" fzf.vim
+" ------------------------------------------------------------
+
+" Find files, open buffers, and Git-tracked files.
+nnoremap <silent> <leader>ff :Files<CR>
+nnoremap <silent> <leader>fb :Buffers<CR>
+nnoremap <silent> <leader>fg :GFiles<CR>
+
+
+" ------------------------------------------------------------
+" Git
+" ------------------------------------------------------------
+
+" Open Fugitive's Git status window.
+nnoremap <silent> <leader>gs :Git<CR>
+
+" Keep GitGutter from defining its own mappings.  Use explicit leader
+" mappings instead so the default Vim keymap stays predictable.
+let g:gitgutter_map_keys = 0
+
+nnoremap <silent> <leader>hp :GitGutterPreviewHunk<CR>
+nnoremap <silent> <leader>hs :GitGutterStageHunk<CR>
+nnoremap <silent> <leader>hu :GitGutterUndoHunk<CR>
 
 
 " ------------------------------------------------------------
