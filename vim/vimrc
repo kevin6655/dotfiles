@@ -1,0 +1,197 @@
+" ============================================================
+" Vim configuration for YAML / Python / Go / SQL
+" ============================================================
+
+" ------------------------------------------------------------
+" Core
+" ------------------------------------------------------------
+
+set nocompatible
+
+" Enable filetype plugins and filetype-specific indentation.
+filetype plugin indent on
+
+" Syntax highlighting.
+syntax enable
+
+" Use UTF-8 internally.
+set encoding=utf-8
+
+
+" ------------------------------------------------------------
+" Line numbers
+" ------------------------------------------------------------
+
+" Current line: absolute line number.
+" Other lines: relative line numbers.
+set number
+set relativenumber
+
+
+" ------------------------------------------------------------
+" UI
+" ------------------------------------------------------------
+
+set cursorline
+set showcmd
+set showmode
+set laststatus=2
+set showmatch
+
+" Keep context around the cursor while scrolling.
+set scrolloff=5
+set sidescrolloff=5
+
+" Do not visually wrap long code lines.
+set nowrap
+
+" Show tabs and trailing spaces.
+set list
+set listchars=tab:»-,trail:·,extends:>,precedes:<
+
+
+" ------------------------------------------------------------
+" Search
+" ------------------------------------------------------------
+
+set incsearch
+set hlsearch
+set ignorecase
+set smartcase
+
+" Press Esc twice to clear search highlighting.
+nnoremap <silent> <Esc><Esc> :nohlsearch<CR>
+
+
+" ------------------------------------------------------------
+" Indentation - defaults
+" ------------------------------------------------------------
+
+set autoindent
+
+" Default indentation: 4 spaces.
+" Filetype-specific settings below override this where necessary.
+set expandtab
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+
+
+" ------------------------------------------------------------
+" Filetype-specific settings
+" ------------------------------------------------------------
+
+augroup my_filetype_settings
+    autocmd!
+
+    " YAML: indentation must use spaces, commonly 2 spaces.
+    autocmd FileType yaml setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+
+    " Python: PEP 8 uses 4-space indentation.
+    " tabstop=8 preserves conventional rendering of literal TAB characters.
+    autocmd FileType python setlocal expandtab tabstop=8 shiftwidth=4 softtabstop=4
+
+    " Go: use real TAB characters in source indentation.
+    " These values match the behavior expected by gofmt and Vim's Go ftplugin.
+    autocmd FileType go setlocal noexpandtab tabstop=8 shiftwidth=0 softtabstop=0
+
+    " SQL: use 2-space indentation for this configuration.
+    autocmd FileType sql setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+
+    " Do not automatically continue comments when pressing Enter or o/O.
+    autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
+augroup END
+
+
+" ------------------------------------------------------------
+" Editing
+" ------------------------------------------------------------
+
+" Allow Backspace across indentation, line breaks and insert start.
+set backspace=indent,eol,start
+
+
+" ------------------------------------------------------------
+" Command-line completion
+" ------------------------------------------------------------
+
+set wildmenu
+set wildmode=longest:full,full
+
+
+" ------------------------------------------------------------
+" Recovery / Undo / Backup
+" ------------------------------------------------------------
+
+" Persistent undo history.
+if has('persistent_undo')
+    if !isdirectory(expand('~/.vim/undo'))
+        call mkdir(expand('~/.vim/undo'), 'p')
+    endif
+
+    set undofile
+    set undodir=~/.vim/undo//
+endif
+
+" Keep swap files for crash/session recovery, but store them centrally.
+if !isdirectory(expand('~/.vim/swap'))
+    call mkdir(expand('~/.vim/swap'), 'p')
+endif
+
+set directory=~/.vim/swap//
+
+" Do not keep permanent backup files after a successful write.
+set nobackup
+
+" Keep a temporary backup while writing for safer file replacement.
+set writebackup
+
+
+" ------------------------------------------------------------
+" Split windows
+" ------------------------------------------------------------
+
+set splitbelow
+set splitright
+
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+
+" ------------------------------------------------------------
+" Leader mappings
+" ------------------------------------------------------------
+
+let mapleader = " "
+
+" Save.
+nnoremap <silent> <leader>w :write<CR>
+
+" Quit.
+nnoremap <silent> <leader>q :quit<CR>
+
+" Force quit.
+nnoremap <silent> <leader>Q :quit!<CR>
+
+" Move between buffers.
+nnoremap <silent> <leader>n :bnext<CR>
+nnoremap <silent> <leader>p :bprevious<CR>
+
+" Open netrw.
+nnoremap <silent> <leader>e :Ex<CR>
+
+
+" ------------------------------------------------------------
+" Misc
+" ------------------------------------------------------------
+
+" Notice when files were changed outside Vim.
+set autoread
+
+" CursorHold / swap update interval.
+set updatetime=1000
+
+" Enable mouse support in terminals that support it.
+set mouse=a
